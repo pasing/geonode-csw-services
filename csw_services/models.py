@@ -74,39 +74,44 @@ def post_save_service(instance, sender, **kwargs):
     """Get information from catalogue"""
     resources = ResourceBase.objects.filter(id=instance.resourcebase_ptr.id)
     LOGGER.warn(f'*** POST SAVING SERVICE "{instance.uuid}"')
+    if resources.exists() and resources.count() == 1:
+        # Update the Catalog
+        try:
+            catalogue = get_catalogue()
+            catalogue.create_record(instance)
+            record = catalogue.get_record(instance.uuid)
+        except EnvironmentError as err:
+            if err.errno == errno.ECONNREFUSED:
+                LOGGER.warning(f'Could not connect to catalogue to save information for layer "{instance.name}"', err)
+                return
+            else:
+                raise err
 
-    # Update the Catalog
-    try:
-        catalogue = get_catalogue()
-        catalogue.create_record(instance)
-        record = catalogue.get_record(instance.uuid)
-    except EnvironmentError as err:
-        if err.errno == errno.ECONNREFUSED:
-            LOGGER.warning(f'Could not connect to catalogue to save information for layer "{instance.name}"', err)
+        if not record:
+            LOGGER.exception(f'Metadata record for service {instance.title} does not exist, check the catalogue signals.')
             return
+
+        # generate an XML document
+        if instance.metadata_uploaded and instance.metadata_uploaded_preserve:
+            md_doc = etree.tostring(dlxml.fromstring(instance.metadata_xml))
         else:
-            raise err
+            LOGGER.info(f'Rebuilding metadata document for "{instance.uuid}"')
+            template = getattr(settings, 'CATALOG_SERVICE_METADATA_TEMPLATE', 'xml/service-template.xml')
+            md_doc = create_metadata_document(instance, template)
+        try:
+            csw_anytext = catalogue.catalogue.csw_gen_anytext(md_doc)
+        except Exception as e:
+            LOGGER.exception(e)
+            csw_anytext = ''
 
-    if not record:
-        LOGGER.exception(f'Metadata record for service {instance.title} does not exist, check the catalogue signals.')
-        return
+        r = resources.get()
+        r.set_workflow_perms(approved=True, published=True)
 
-    # generate an XML document
-    if instance.metadata_uploaded and instance.metadata_uploaded_preserve:
-        md_doc = etree.tostring(dlxml.fromstring(instance.metadata_xml))
+        resources.update(
+            metadata_xml=md_doc,
+            csw_anytext=csw_anytext)
     else:
-        LOGGER.info(f'Rebuilding metadata document for "{instance.uuid}"')
-        template = getattr(settings, 'CATALOG_SERVICE_METADATA_TEMPLATE', 'xml/service-template.xml')
-        md_doc = create_metadata_document(instance, template)
-    try:
-        csw_anytext = catalogue.catalogue.csw_gen_anytext(md_doc)
-    except Exception as e:
-        LOGGER.exception(e)
-        csw_anytext = ''
-
-    resources.update(
-        metadata_xml=md_doc,
-        csw_anytext=csw_anytext)
+        LOGGER.warn(f'*** The resource selected does not exists or or more than one is selected "{instance.uuid}"')
 
 
 def create_metadata_document(instance, template):
