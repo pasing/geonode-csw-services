@@ -74,7 +74,7 @@ def post_save_service(instance, sender, **kwargs):
     """Get information from catalogue"""
     resources = ResourceBase.objects.filter(id=instance.resourcebase_ptr.id)
     LOGGER.warn(f'*** POST SAVING SERVICE "{instance.uuid}"')
-    if resources.exists() and resources.count() == 1:
+    if resources.exists():
         # Update the Catalog
         try:
             catalogue = get_catalogue()
@@ -104,8 +104,8 @@ def post_save_service(instance, sender, **kwargs):
             LOGGER.exception(e)
             csw_anytext = ''
 
-        r = resources.get()
-        r.set_workflow_perms(approved=True, published=True)
+        for r in resources:
+            r.set_workflow_perms(approved=True, published=True)
 
         resources.update(
             metadata_xml=md_doc,
