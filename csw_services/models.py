@@ -105,7 +105,7 @@ def post_save_service(instance, sender, **kwargs):
             csw_anytext = ''
 
         for r in resources:
-            r.set_workflow_perms(approved=True, published=True)
+            r.set_workflow_perms(published=instance.is_published)
 
         resources.update(
             metadata_xml=md_doc,
