@@ -23,12 +23,12 @@ Geonode-csw_services is a Django App to let GeoNode handle some service metadata
 
 1. To customize the metadata document, use your own service template:  
 
-       CATALOG_SERVICE_METADATA_TEMPLATE = 'xml/template-service.xml'
+       CATALOG_SERVICE_METADATA_TEMPLATE = 'xml/service-template.xml'
 
 
 ## Tests
 
-In order to run tests (NOTE: must be in geonode venv), run ``python -m unittest -v`` to create the models.
+In order to run tests (NOTE: must be in geonode venv), run ``python -m unittest -v``.
 
 ## Uninstalling
 
