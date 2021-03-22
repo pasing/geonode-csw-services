@@ -1,16 +1,17 @@
 from enum import Enum
 import errno
 import logging
+
+from geonode.security.utils import remove_object_permissions
+from guardian.shortcuts import assign_perm
 from lxml import etree
 from defusedxml import lxml as dlxml
 
 from django.db import models
 from django.db.models import signals
 from django.conf import settings
-from django.dispatch import receiver
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
-
+from django.contrib.auth.models import Group
 
 from geonode.base.models import ResourceBase
 from geonode.catalogue import get_catalogue
@@ -51,6 +52,9 @@ def pre_save_service(instance, sender, **kwargs):
 
     instance.csw_type = 'service'
 
+    # we don't want this resource to appear in the GUI
+    instance.metadata_only = True
+
     if instance.abstract == '' or instance.abstract is None:
         instance.abstract = 'No abstract provided'
     if instance.title == '' or instance.title is None:
@@ -63,8 +67,10 @@ def pre_save_service(instance, sender, **kwargs):
         instance.bbox_polygon.srid
     )
 
+
 def pre_delete_service(instance, sender, **kwargs):
     remove_object_permissions(instance)
+
 
 def post_delete_service(instance, sender, **kwargs):
     pass
@@ -98,6 +104,7 @@ def post_save_service(instance, sender, **kwargs):
             LOGGER.info(f'Rebuilding metadata document for "{instance.uuid}"')
             template = getattr(settings, 'CATALOG_SERVICE_METADATA_TEMPLATE', 'xml/service-template.xml')
             md_doc = create_metadata_document(instance, template)
+
         try:
             csw_anytext = catalogue.catalogue.csw_gen_anytext(md_doc)
         except Exception as e:
@@ -105,7 +112,11 @@ def post_save_service(instance, sender, **kwargs):
             csw_anytext = ''
 
         for r in resources:
-            r.set_workflow_perms(published=instance.is_published)
+            if instance.is_published:
+                anonymous_group = Group.objects.get(name='anonymous')
+                assign_perm('view_resourcebase', anonymous_group, r)
+            else:
+                remove_object_permissions(r)
 
         resources.update(
             metadata_xml=md_doc,
@@ -120,6 +131,7 @@ def create_metadata_document(instance, template):
     ctx = {
         'service': instance,
         'SITEURL': site_url,
+        'GEOSERVER_URL': settings.GEOSERVER_PUBLIC_LOCATION,
         }
     md_doc = tpl.render(context=ctx)
     return md_doc
