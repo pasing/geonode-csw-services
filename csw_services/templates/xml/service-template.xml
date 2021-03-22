@@ -1,16 +1,11 @@
-<gmd:MD_Metadata xmlns:gts="http://www.isotc211.org/2005/gts"
+<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd"
                  xmlns:gml="http://www.opengis.net/gml/3.2"
-                 xmlns:gmd="http://www.isotc211.org/2005/gmd"
-                 xmlns:xs="http://www.w3.org/2001/XMLSchema"
                  xmlns:gmx="http://www.isotc211.org/2005/gmx"
-                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xmlns:srv="http://www.isotc211.org/2005/srv"
                  xmlns:gco="http://www.isotc211.org/2005/gco"
-                 xmlns:gsr="http://www.isotc211.org/2005/gsr"
-                 xmlns:gss="http://www.isotc211.org/2005/gss"
                  xmlns:xlink="http://www.w3.org/1999/xlink">
    <gmd:fileIdentifier>
-      <gco:CharacterString>cmfi:451c8562-6efa-43ad-a887-7981f9508b64</gco:CharacterString>
+      <gco:CharacterString>{{ service.uuid }}</gco:CharacterString>
    </gmd:fileIdentifier>
    <gmd:language>
       <gmd:LanguageCode
@@ -31,62 +26,81 @@
       <gco:CharacterString>servizio</gco:CharacterString>
    </gmd:hierarchyLevelName>
    <gmd:contact>
+      {% with service.owner as poc %}
       <gmd:CI_ResponsibleParty>
-         <gmd:organisationName>
-            <gco:CharacterString>Org PoC</gco:CharacterString>
+         {# Req C.6: OrganisationName[1] #}
+         <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+            {% if poc.organization %}
+            <gco:CharacterString>{{ poc.organization }}</gco:CharacterString>
+            {% endif %}
          </gmd:organisationName>
+         {% if poc.position %}
+         <gmd:positionName>
+            <gco:CharacterString>{{ poc.position }}</gco:CharacterString>
+         </gmd:positionName>
+         {% endif %}
          <gmd:contactInfo>
             <gmd:CI_Contact>
+               {# Req C.6: Telefono[0..1] #}
+               {% if poc.voice %}
                <gmd:phone>
                   <gmd:CI_Telephone>
                      <gmd:voice>
-                        <gco:CharacterString>000</gco:CharacterString>
+                        <gco:CharacterString>{{ poc.voice }}</gco:CharacterString>
                      </gmd:voice>
                   </gmd:CI_Telephone>
                </gmd:phone>
+               {% endif %}
                <gmd:address>
                   <gmd:CI_Address>
-                     <gmd:electronicMailAddress>
-                        <gco:CharacterString>responsabile.metadati@organizzazione.it</gco:CharacterString>
+                     {# Req C.6: email[1..*] #}
+                     <gmd:electronicMailAddress {% if not poc.email %}gco:nilReason="missing"{% endif %}>
+                        {% if poc.email %}
+                        <gco:CharacterString>{{ poc.email }}</gco:CharacterString>
+                        {% endif %}
                      </gmd:electronicMailAddress>
                   </gmd:CI_Address>
                </gmd:address>
                <gmd:onlineResource>
                   <gmd:CI_OnlineResource>
                      <gmd:linkage>
-                        <gmd:URL>http://x</gmd:URL>
+                        <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
                      </gmd:linkage>
                   </gmd:CI_OnlineResource>
                </gmd:onlineResource>
             </gmd:CI_Contact>
          </gmd:contactInfo>
          <gmd:role>
+            {# Req C.6: role=pointOfContact #}
             <gmd:CI_RoleCode
-                    codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
-                    codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+               codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
+               codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
          </gmd:role>
       </gmd:CI_ResponsibleParty>
-  </gmd:contact>
+      {% endwith %}
+   </gmd:contact>
    <gmd:dateStamp>
-      <gco:Date>2021-03-09</gco:Date>
+      <gco:Date>{{service.csw_insert_date|date:"Y-m-d"}}</gco:Date>
    </gmd:dateStamp>
+
    <gmd:metadataStandardName>
       <gco:CharacterString>Linee Guida RNDT</gco:CharacterString>
    </gmd:metadataStandardName>
    <gmd:metadataStandardVersion>
       <gco:CharacterString>2.0</gco:CharacterString>
    </gmd:metadataStandardVersion>
+
    <gmd:identificationInfo>
       <srv:SV_ServiceIdentification>
          <gmd:citation>
             <gmd:CI_Citation>
                <gmd:title>
-                  <gco:CharacterString>{{ service.title }}</gco:CharacterString>
+                  <gco:CharacterString>[{{ service.service_type}}] {{ service.title }}</gco:CharacterString>
                </gmd:title>
                <gmd:date>
                   <gmd:CI_Date>
                      <gmd:date>
-                        <gco:Date>2021-02-01</gco:Date>
+                        <gco:Date>{{ service.date|date:"Y-m-d" }}</gco:Date>
                      </gmd:date>
                      <gmd:dateType>
                         <gmd:CI_DateTypeCode
@@ -98,46 +112,63 @@
                <gmd:identifier>
                   <gmd:MD_Identifier>
                      <gmd:code>
-                        <gco:CharacterString>{{ service.uuid }}</gco:CharacterString>
+                        <gco:CharacterString>https://geodati.gov.it/resource/id/{{service.uuid}}</gco:CharacterString>
                      </gmd:code>
                   </gmd:MD_Identifier>
                </gmd:identifier>
                <gmd:citedResponsibleParty>
+                  {% with service.owner as poc %}
                   <gmd:CI_ResponsibleParty>
-                     <gmd:organisationName>
-                        <gco:CharacterString>Org owner</gco:CharacterString>
+                     {# Req C.6: OrganisationName[1] #}
+                     <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+                        {% if poc.organization %}
+                        <gco:CharacterString>{{ poc.organization }}</gco:CharacterString>
+                        {% endif %}
                      </gmd:organisationName>
+                     {% if poc.position %}
+                     <gmd:positionName>
+                        <gco:CharacterString>{{ poc.position }}</gco:CharacterString>
+                     </gmd:positionName>
+                     {% endif %}
                      <gmd:contactInfo>
                         <gmd:CI_Contact>
+                           {# Req C.6: Telefono[0..1] #}
+                           {% if poc.voice %}
                            <gmd:phone>
                               <gmd:CI_Telephone>
                                  <gmd:voice>
-                                    <gco:CharacterString>000</gco:CharacterString>
+                                    <gco:CharacterString>{{ poc.voice }}</gco:CharacterString>
                                  </gmd:voice>
                               </gmd:CI_Telephone>
                            </gmd:phone>
+                           {% endif %}
                            <gmd:address>
                               <gmd:CI_Address>
-                                 <gmd:electronicMailAddress>
-                                    <gco:CharacterString>owner@org.org</gco:CharacterString>
+                                 {# Req C.6: email[1..*] #}
+                                 <gmd:electronicMailAddress {% if not poc.email %}gco:nilReason="missing"{% endif %}>
+                                    {% if poc.email %}
+                                    <gco:CharacterString>{{ poc.email }}</gco:CharacterString>
+                                    {% endif %}
                                  </gmd:electronicMailAddress>
                               </gmd:CI_Address>
                            </gmd:address>
                            <gmd:onlineResource>
                               <gmd:CI_OnlineResource>
                                  <gmd:linkage>
-                                    <gmd:URL>http://owner</gmd:URL>
+                                    <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
                                  </gmd:linkage>
                               </gmd:CI_OnlineResource>
                            </gmd:onlineResource>
                         </gmd:CI_Contact>
                      </gmd:contactInfo>
                      <gmd:role>
+                        {# Req C.6: role=pointOfContact #}
                         <gmd:CI_RoleCode
-                                codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
-                                codeListValue="owner">owner</gmd:CI_RoleCode>
+                           codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
+                           codeListValue="owner">owner</gmd:CI_RoleCode>
                      </gmd:role>
                   </gmd:CI_ResponsibleParty>
+                  {% endwith %}
                </gmd:citedResponsibleParty>
             </gmd:CI_Citation>
          </gmd:citation>
@@ -145,57 +176,74 @@
             <gco:CharacterString>{{ service.abstract }}</gco:CharacterString>
          </gmd:abstract>
          <gmd:pointOfContact>
+            {% with service.owner as poc %}
             <gmd:CI_ResponsibleParty>
-               <gmd:organisationName>
-                  <gco:CharacterString>Org service poc</gco:CharacterString>
+               {# Req C.6: OrganisationName[1] #}
+               <gmd:organisationName {% if not poc.organization %}gco:nilReason="missing"{% endif %}>
+                  {% if poc.organization %}
+                  <gco:CharacterString>{{ poc.organization }}</gco:CharacterString>
+                  {% endif %}
                </gmd:organisationName>
+               {% if poc.position %}
+               <gmd:positionName>
+                  <gco:CharacterString>{{ poc.position }}</gco:CharacterString>
+               </gmd:positionName>
+               {% endif %}
                <gmd:contactInfo>
                   <gmd:CI_Contact>
+                     {# Req C.6: Telefono[0..1] #}
+                     {% if poc.voice %}
                      <gmd:phone>
                         <gmd:CI_Telephone>
                            <gmd:voice>
-                              <gco:CharacterString>000</gco:CharacterString>
+                              <gco:CharacterString>{{ poc.voice }}</gco:CharacterString>
                            </gmd:voice>
                         </gmd:CI_Telephone>
                      </gmd:phone>
+                     {% endif %}
                      <gmd:address>
                         <gmd:CI_Address>
-                           <gmd:electronicMailAddress>
-                              <gco:CharacterString>informazioni.risorsa@organizzazione.it</gco:CharacterString>
+                           {# Req C.6: email[1..*] #}
+                           <gmd:electronicMailAddress {% if not poc.email %}gco:nilReason="missing"{% endif %}>
+                              {% if poc.email %}
+                              <gco:CharacterString>{{ poc.email }}</gco:CharacterString>
+                              {% endif %}
                            </gmd:electronicMailAddress>
                         </gmd:CI_Address>
                      </gmd:address>
                      <gmd:onlineResource>
                         <gmd:CI_OnlineResource>
                            <gmd:linkage>
-                              <gmd:URL>http://service.poc.org</gmd:URL>
+                              <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
                            </gmd:linkage>
                         </gmd:CI_OnlineResource>
                      </gmd:onlineResource>
                   </gmd:CI_Contact>
                </gmd:contactInfo>
                <gmd:role>
-                  <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
-                                   codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+                  {# Req C.6: role=pointOfContact #}
+                  <gmd:CI_RoleCode
+                     codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode"
+                     codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
                </gmd:role>
             </gmd:CI_ResponsibleParty>
-         </gmd:pointOfContact>
+            {% endwith %}
+        </gmd:pointOfContact>
          <gmd:descriptiveKeywords>
             <gmd:MD_Keywords>
                <gmd:keyword>
                   <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceCategory/infoManagementService">Servizio di gestione dei modelli/informazioni geografiche</gmx:Anchor>
                </gmd:keyword>
                <gmd:keyword>
-                   {% if service.service_type == "OGC:WMS" %}
+                   {% if service.service_type == "WMS" %}
                    <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceCategory/infoMapAccessService">Servizio di accesso a mappe (map)</gmx:Anchor>
-                   {% elif service.service_type == "OGC:WFS" %}
+                   {% elif service.service_type == "WFS" %}
                   <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceCategory/infoFeatureAccessService">Servizio di accesso a elementi (feature)</gmx:Anchor>
-                   {% elif service.service_type == "OGC:WCS" %}
+                   {% elif service.service_type == "WCS" %}
                   <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceCategory/infoCoverageAccessService">Servizio di accesso a coperture (coverage)</gmx:Anchor>
                    {% else %}
                   <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/SpatialDataServiceCategory/infoCatalogueService">Servizio di catalogo</gmx:Anchor>
                    {% endif %}
-
                </gmd:keyword>
                <gmd:type>
                   <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_KeywordTypeCode"
@@ -217,13 +265,6 @@
                            </gmd:dateType>
                         </gmd:CI_Date>
                      </gmd:date>
-                     <gmd:identifier>
-                        <gmd:MD_Identifier>
-                           <gmd:code>
-                              <gmx:Anchor xlink:href="http://gn3-rndt.geo-solutions.it/geonetwork/srv/eng/thesaurus.download?ref=external.theme.httpinspireeceuropaeumetadatacodelistSpatialDataServiceCategory-SpatialDataServiceCategory_RNDT">geonetwork.thesaurus.external.theme.httpinspireeceuropaeumetadatacodelistSpatialDataServiceCategory-SpatialDataServiceCategory_RNDT</gmx:Anchor>
-                           </gmd:code>
-                        </gmd:MD_Identifier>
-                     </gmd:identifier>
                   </gmd:CI_Citation>
                </gmd:thesaurusName>
             </gmd:MD_Keywords>
@@ -251,11 +292,11 @@
             </gmd:MD_LegalConstraints>
          </gmd:resourceConstraints>
          <srv:serviceType>
-           {% if service.service_type == "OGC:WMS" %}
+           {% if service.service_type == "WMS" %}
             <gco:LocalName codeSpace="http://inspire.ec.europa.eu/metadatacodelist/SpatialDataServiceType">view</gco:LocalName>
-           {% elif service.service_type == "OGC:WFS" %}
+           {% elif service.service_type == "WFS" %}
             <gco:LocalName codeSpace="http://inspire.ec.europa.eu/metadatacodelist/SpatialDataServiceType">download</gco:LocalName>
-           {% elif service.service_type == "OGC:WCS" %}
+           {% elif service.service_type == "WCS" %}
             <gco:LocalName codeSpace="http://inspire.ec.europa.eu/metadatacodelist/SpatialDataServiceType">download</gco:LocalName>
            {% else %}
             <gco:LocalName codeSpace="http://inspire.ec.europa.eu/metadatacodelist/SpatialDataServiceType">other</gco:LocalName>
@@ -279,32 +320,22 @@
                      </gmd:northBoundLatitude>
                   </gmd:EX_GeographicBoundingBox>
                </gmd:geographicElement>
-               <gmd:temporalElement>
-                  <gmd:EX_TemporalExtent>
-                     <gmd:extent>
-                        <gml:TimePeriod gml:id="TP1">
-                           <gml:beginPosition>2009-01-01</gml:beginPosition>
-                           <gml:endPosition>2099-12-31</gml:endPosition>
-                        </gml:TimePeriod>
-                     </gmd:extent>
-                  </gmd:EX_TemporalExtent>
-               </gmd:temporalElement>
             </gmd:EX_Extent>
          </srv:extent>
          <srv:couplingType>
             <srv:SV_CouplingType codeListValue="loose"
                                  codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#SV_CouplingType">loose</srv:SV_CouplingType>
          </srv:couplingType>
-         <srv:containsOperations/>
-         <srv:containsOperations/>
          <srv:containsOperations>
+            {% if service.service_type == "WMS" %}
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetCapabilities</gco:CharacterString>
                </srv:operationName>
                <srv:DCP>
-                  <srv:DCPList codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
-                               codeListValue="webServices">webServices</srv:DCPList>
+                  <srv:DCPList
+                     codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                     codeListValue="webServices">WebServices</srv:DCPList>
                </srv:DCP>
                <srv:invocationName>
                   <gco:CharacterString>service=WMS&amp;version=1.3.0&amp;request=GetCapabilities</gco:CharacterString>
@@ -312,13 +343,178 @@
                <srv:connectPoint>
                   <gmd:CI_OnlineResource>
                      <gmd:linkage>
-                        <gmd:URL>http://TODO</gmd:URL>
+                        <gmd:URL>{{ GEOSERVER_URL }}wms?</gmd:URL>
                      </gmd:linkage>
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
+
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>GetMap</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                          codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                          codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WMS&amp;version=1.3.0&amp;request=GetMap</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wms?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+            {% elif service.service_type == "WFS" %}
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>GetCapabilities</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                     codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                     codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WFS&amp;version=2.0.0&amp;request=GetCapabilities</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wfs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>GetFeature</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                          codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                          codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WFS&amp;version=2.0.0&amp;request=GetFeature</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wfs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>DescribeFeatureType</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                          codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                          codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WFS&amp;version=2.0.0&amp;request=DescribeFeatureType</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wfs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+            {% elif service.service_type == "WCS" %}
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>GetCapabilities</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                     codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                     codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WCS&amp;version=2.0&amp;request=GetCapabilities</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wcs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>GetCoverage</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                          codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                          codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WCS&amp;version=2.0&amp;request=GetCoverage</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wcs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>DescribeCoverage</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                          codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                          codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:invocationName>
+                  <gco:CharacterString>service=WCS&amp;version=2.0&amp;request=DescribeCoverage</gco:CharacterString>
+               </srv:invocationName>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}wcs?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+            {% else %}
+            <srv:SV_OperationMetadata>
+               <srv:operationName>
+                  <gco:CharacterString>Unknown</gco:CharacterString>
+               </srv:operationName>
+               <srv:DCP>
+                  <srv:DCPList
+                     codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList"
+                     codeListValue="webServices">WebServices</srv:DCPList>
+               </srv:DCP>
+               <srv:connectPoint>
+                  <gmd:CI_OnlineResource>
+                     <gmd:linkage>
+                        <gmd:URL>{{ GEOSERVER_URL }}/ows?</gmd:URL>
+                     </gmd:linkage>
+                  </gmd:CI_OnlineResource>
+               </srv:connectPoint>
+            </srv:SV_OperationMetadata>
+            {% endif %}
          </srv:containsOperations>
-         <srv:operatesOn xlink:href=""/>
       </srv:SV_ServiceIdentification>
    </gmd:identificationInfo>
    <gmd:dataQualityInfo>
@@ -374,8 +570,8 @@
                   <gmd:DQ_ConformanceResult>
                      <gmd:specification>
                         <gmd:CI_Citation>
-                           <gmd:title gco:nilReason="missing">
-                              <gco:CharacterString/>
+                           <gmd:title>
+                              <gmx:Anchor xlink:href="http://data.europa.eu/eli/reg/2009/976">REGOLAMENTO (CE) N. 976/2009 DELLA COMMISSIONE del 19 ottobre 2009 recante attuazione della direttiva 2007/2/CE del Parlamento europeo e del Consiglio per quanto riguarda i servizi di rete</gmx:Anchor>
                            </gmd:title>
                            <gmd:date>
                               <gmd:CI_Date>
