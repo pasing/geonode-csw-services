@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('base', '0057_auto_20210309_1813'),
+        ('base', '0057_resourcebase_metadata_only'),
     ]
 
     operations = [
