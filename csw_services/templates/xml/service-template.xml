@@ -61,13 +61,15 @@
                      </gmd:electronicMailAddress>
                   </gmd:CI_Address>
                </gmd:address>
+               {% if poc.delivery %}
                <gmd:onlineResource>
                   <gmd:CI_OnlineResource>
                      <gmd:linkage>
-                        <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
+                        <gmd:URL>{{ poc.delivery }}</gmd:URL>
                      </gmd:linkage>
                   </gmd:CI_OnlineResource>
                </gmd:onlineResource>
+               {% endif %}
             </gmd:CI_Contact>
          </gmd:contactInfo>
          <gmd:role>
@@ -152,13 +154,15 @@
                                  </gmd:electronicMailAddress>
                               </gmd:CI_Address>
                            </gmd:address>
+                           {% if poc.delivery %}
                            <gmd:onlineResource>
                               <gmd:CI_OnlineResource>
                                  <gmd:linkage>
-                                    <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
+                                    <gmd:URL>{{ poc.delivery }}</gmd:URL>
                                  </gmd:linkage>
                               </gmd:CI_OnlineResource>
                            </gmd:onlineResource>
+                           {% endif %}
                         </gmd:CI_Contact>
                      </gmd:contactInfo>
                      <gmd:role>
@@ -211,13 +215,15 @@
                            </gmd:electronicMailAddress>
                         </gmd:CI_Address>
                      </gmd:address>
+                     {% if poc.delivery %}
                      <gmd:onlineResource>
                         <gmd:CI_OnlineResource>
                            <gmd:linkage>
-                              <gmd:URL>{{ SITEURL }}{{ layer.poc.get_absolute_url }}</gmd:URL>
+                              <gmd:URL>{{ poc.delivery }}</gmd:URL>
                            </gmd:linkage>
                         </gmd:CI_OnlineResource>
                      </gmd:onlineResource>
+                     {% endif %}
                   </gmd:CI_Contact>
                </gmd:contactInfo>
                <gmd:role>
