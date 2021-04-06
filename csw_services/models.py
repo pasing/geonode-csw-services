@@ -52,6 +52,9 @@ def pre_save_service(instance, sender, **kwargs):
 
     instance.csw_type = 'service'
 
+    # prevents filtering out from csw backend: https://github.com/GeoNode/geonode/issues/7159
+    instance.alternate = 'title'
+
     # we don't want this resource to appear in the GUI
     instance.metadata_only = True
 
