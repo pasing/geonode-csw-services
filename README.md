@@ -8,7 +8,7 @@ Geonode-csw_services is a Django App to let GeoNode handle some service metadata
 
 1. Install the application as requirement:
 
-       pip install -e git+https://github.com/geosolutions-it/geonode-csw_services@master#egg=csw_services
+       pip install -e git+https://github.com/geosolutions-it/geonode-csw_services@main#egg=csw_services
 
 1. Add "csw_services" to your INSTALLED_APPS setting like this::
 
