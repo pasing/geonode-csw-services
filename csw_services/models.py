@@ -2,7 +2,7 @@ from enum import Enum
 import errno
 import logging
 
-from geonode.security.utils import remove_object_permissions
+from geonode.security.utils import ResourceManager
 from guardian.shortcuts import assign_perm
 from lxml import etree
 from defusedxml import lxml as dlxml
@@ -50,7 +50,10 @@ class CswService(ResourceBase):
 
 def pre_save_service(instance, sender, **kwargs):
 
-    instance.csw_type = 'service'
+    instance.csw_type = 'cswservice'
+
+    if hasattr(instance, "resource_type"):
+        instance.resource_type = 'cswservice'
 
     # prevents filtering out from csw backend: https://github.com/GeoNode/geonode/issues/7159
     instance.alternate = 'title'
@@ -72,7 +75,7 @@ def pre_save_service(instance, sender, **kwargs):
 
 
 def pre_delete_service(instance, sender, **kwargs):
-    remove_object_permissions(instance)
+    ResourceManager.remove_permissions(instance.uuid, instance=instance.get_self_resource())
 
 
 def post_delete_service(instance, sender, **kwargs):
@@ -119,7 +122,8 @@ def post_save_service(instance, sender, **kwargs):
                 anonymous_group = Group.objects.get(name='anonymous')
                 assign_perm('view_resourcebase', anonymous_group, r)
             else:
-                remove_object_permissions(r)
+                ResourceManager.remove_permissions(r.uuid, instance=r.get_self_resource())
+
 
         resources.update(
             metadata_xml=md_doc,
