@@ -332,8 +332,8 @@
             <srv:SV_CouplingType codeListValue="loose"
                                  codeList="http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#SV_CouplingType">loose</srv:SV_CouplingType>
          </srv:couplingType>
+         {% if service.service_type == "WMS" %}
          <srv:containsOperations>
-            {% if service.service_type == "WMS" %}
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetCapabilities</gco:CharacterString>
@@ -354,7 +354,8 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-
+         </srv:containsOperations>
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetMap</gco:CharacterString>
@@ -375,7 +376,9 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-            {% elif service.service_type == "WFS" %}
+         </srv:containsOperations>
+         {% elif service.service_type == "WFS" %}
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetCapabilities</gco:CharacterString>
@@ -396,7 +399,8 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-
+         </srv:containsOperations>
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetFeature</gco:CharacterString>
@@ -417,7 +421,8 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-
+         </srv:containsOperations>
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>DescribeFeatureType</gco:CharacterString>
@@ -438,7 +443,9 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-            {% elif service.service_type == "WCS" %}
+         </srv:containsOperations>
+         {% elif service.service_type == "WCS" %}
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetCapabilities</gco:CharacterString>
@@ -459,7 +466,8 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-
+         </srv:containsOperations>
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>GetCoverage</gco:CharacterString>
@@ -480,7 +488,8 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-
+         </srv:containsOperations>
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>DescribeCoverage</gco:CharacterString>
@@ -501,7 +510,9 @@
                   </gmd:CI_OnlineResource>
                </srv:connectPoint>
             </srv:SV_OperationMetadata>
-            {% else %}
+         </srv:containsOperations>
+         {% else %}
+         <srv:containsOperations>
             <srv:SV_OperationMetadata>
                <srv:operationName>
                   <gco:CharacterString>Unknown</gco:CharacterString>
