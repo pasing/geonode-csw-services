@@ -2,7 +2,7 @@ from enum import Enum
 import errno
 import logging
 
-from geonode.security.utils import ResourceManager
+from geonode.resource.manager import ResourceManager
 from guardian.shortcuts import assign_perm
 from lxml import etree
 from defusedxml import lxml as dlxml
@@ -85,7 +85,7 @@ def post_delete_service(instance, sender, **kwargs):
 def post_save_service(instance, sender, **kwargs):
     """Get information from catalogue"""
     resources = ResourceBase.objects.filter(id=instance.resourcebase_ptr.id)
-    LOGGER.warn(f'*** POST SAVING SERVICE "{instance.uuid}"')
+    LOGGER.warning(f'*** POST SAVING SERVICE "{instance.uuid}"')
     if resources.exists():
         # Update the Catalog
         try:
